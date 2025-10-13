@@ -44,7 +44,7 @@ TagManager:
   - name: Background
     uniqueID: 2598864047
     locked: 0
-  - name: Fruit
+  - name: Gameplay
     uniqueID: 1655978571
     locked: 0
   - name: UI
