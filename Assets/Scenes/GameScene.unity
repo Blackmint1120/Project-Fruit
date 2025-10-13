@@ -860,6 +860,52 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &979911460
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 979911462}
+  - component: {fileID: 979911461}
+  m_Layer: 0
+  m_Name: FruitFactory
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &979911461
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 979911460}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cca724be137bfd44bb6d863b1e926e3c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FruitFactory
+  fruitSet: {fileID: 11400000, guid: dc2ba82b87542864d8dec3a20dc851e7, type: 2}
+  fruitPrefab: {fileID: 3509954457125712410, guid: fe72ef7620f0d284e8fe17a4e4e223e0, type: 3}
+--- !u!4 &979911462
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 979911460}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: -9.39026, y: 0.9502, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1239892027
 GameObject:
   m_ObjectHideFlags: 0
@@ -903,3 +949,4 @@ SceneRoots:
   - {fileID: 619394802}
   - {fileID: 1239892028}
   - {fileID: 865494858}
+  - {fileID: 979911462}
