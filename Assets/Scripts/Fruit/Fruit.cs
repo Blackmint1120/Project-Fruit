@@ -24,13 +24,18 @@ public class Fruit : MonoBehaviour
             sr.sprite = Resources.GetBuiltinResource<Sprite>("UI/Skin/Background.psd");
         // 또는 직접 circle.png 한 장 만들어 넣어도 OK
     
-        sr.color = def.color;
-
-        var col = GetComponent<CircleCollider2D>();
-        col.radius = def.radius;
+        var c = def.color;
+        c.a = 1f;
+        sr.color = c;// 완전 불투명 보장
 
         var rb = GetComponent<Rigidbody2D>();
         rb.mass = Mathf.Max(0.01f, def.mass);
+        
+        float baseRadius = 0.5f;
+        float scale = def.radius / baseRadius;
+        transform.localScale = new Vector3(scale, scale, 1f);
+        
+        baseScale = transform.localScale;
     }
 
 

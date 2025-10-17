@@ -1,30 +1,26 @@
 using UnityEngine;
 
-public enum GameState
-{
-    Ready,
-    Dropping,
-    Settling,
-    GameOver
-}
-
 public class GameManager : MonoBehaviour
 {
-    public GameState State { get; private set; } = GameState.Ready;
+    public static GameManager Instance { get; private set; }
 
-    void OnEnable()
+    [SerializeField] private FruitFactory factory;
+    [SerializeField] private Transform fruitParent; // 생성할 부모 Transform
+
+    void Awake()
     {
-        // 관련 event 구독
+        if (Instance == null) Instance = this;
+        else Destroy(gameObject);
     }
 
-    void OnDisable()
+    public void SpawnMergedFruit(int level, Vector3 pos)
     {
-        // 관련 event 구독 해제
-    }
+        if (factory == null) return;
 
-    public void StartGame()
-    {
-        State = GameState.Dropping;
-        
+        var fruit = factory.SpawnFruit(pos, level);
+        if (fruit != null)
+        {
+            fruit.Pop();
+        }
     }
 }

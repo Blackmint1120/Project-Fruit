@@ -13,9 +13,10 @@ GameObject:
   - component: {fileID: 6451706338017565859}
   - component: {fileID: 2692791299661034166}
   - component: {fileID: -3765618560941549646}
+  - component: {fileID: -3021025993228392780}
   m_Layer: 3
   m_Name: Fruit
-  m_TagString: Untagged
+  m_TagString: Fruit
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -169,3 +170,16 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Fruit
   level: 0
+--- !u!114 &-3021025993228392780
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3509954457125712410}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 14fc3bb0ed7bbbe48b2ff508d7cb3bf5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FruitMerger
+  mergeCooldown: 0.15
