@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using System.Collections.Generic;
 
@@ -16,8 +17,11 @@ public class FruitSpawner : MonoBehaviour
 
     [Header("Options")]
     [SerializeField] private bool useGuideLine = true;
-    [SerializeField] private float clampX = 7.5f; // 카메라 비율에 맞게 조정
+    [SerializeField] private float clampX = 5f; // 카메라 비율에 맞게 조정
     [SerializeField] private float spawnYOffset = 0.05f; // 라인보다 살짝 아래로
+
+    public float dropLock = 1f;
+    private bool isLocked = false;
 
     readonly Queue<int> _queue = new();
 
@@ -56,9 +60,10 @@ public class FruitSpawner : MonoBehaviour
         }
 
         // 드롭 입력
-        if (Input.GetKeyDown(KeyCode.Space) || Input.GetMouseButtonDown(0))
+        if (Input.GetKeyDown(KeyCode.Space) && !isLocked)
         {
-            DropAt(world.x);
+            Debug.Log("Space pressed, starting coroutine!");
+            StartCoroutine(LockDrop(world));
         }
     }
 
@@ -117,5 +122,13 @@ public class FruitSpawner : MonoBehaviour
         // 선택: Walls(바닥) 오브젝트를 찾아서 y를 얻고 싶다면 태그/레이어로 탐색
         // 간단히 바닥 콜라이더를 Find 하거나, GameRoot에서 참조 받아도 OK.
         return null;
+    }
+
+    IEnumerator LockDrop(Vector3 world)
+    {
+        isLocked = true;
+        DropAt(world.x);
+        yield return new WaitForSeconds(dropLock);
+        isLocked = false;
     }
 }
