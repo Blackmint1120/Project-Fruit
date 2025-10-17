@@ -1,6 +1,7 @@
 using System.Collections;
 using UnityEngine;
 using System.Collections.Generic;
+using UnityEngine.AI;
 
 public class FruitSpawner : MonoBehaviour
 {
@@ -37,8 +38,7 @@ public class FruitSpawner : MonoBehaviour
         UpdateCurrentRadius();
 
         // 바닥선 찾기(없으면 임시로 화면 하단)
-        _bottomY = FindFloorY() ?? (mainCam.transform.position.y - mainCam.orthographicSize + 0.5f);
-
+        _bottomY = FindFloorY();
         if (guide)
         {
             guide.enabled = useGuideLine;
@@ -117,11 +117,11 @@ public class FruitSpawner : MonoBehaviour
         return world;
     }
 
-    float? FindFloorY()
+    float FindFloorY()
     {
-        // 선택: Walls(바닥) 오브젝트를 찾아서 y를 얻고 싶다면 태그/레이어로 탐색
-        // 간단히 바닥 콜라이더를 Find 하거나, GameRoot에서 참조 받아도 OK.
-        return null;
+        Vector2 start = spawnY.position;
+        RaycastHit2D hit = Physics2D.Raycast(start, Vector2.down);
+        return hit.point.y;
     }
 
     IEnumerator LockDrop(Vector3 world)
