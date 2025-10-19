@@ -2,6 +2,7 @@ using System.Collections;
 using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.AI;
+using UnityEngine.UI;
 
 public class FruitSpawner : MonoBehaviour
 {
@@ -130,5 +131,23 @@ public class FruitSpawner : MonoBehaviour
         DropAt(world.x);
         yield return new WaitForSeconds(dropLock);
         isLocked = false;
+    }
+    
+    public void OnToggleGuideLine(bool on)
+    {
+        Debug.Log(on);
+        useGuideLine = on;
+        if (guide)
+        {
+            guide.enabled = on;
+            if (on)
+            {
+                // 👉 켜질 때 바로 현재 마우스 위치 기준으로 한 번 그려준다
+                Vector3 world = GetWorldPointerOnSpawnY();
+                float clampedX = Mathf.Clamp(world.x, -clampX + _currentRadius, clampX - _currentRadius);
+                guide.SetPosition(0, new Vector3(clampedX, spawnY.position.y, 0f));
+                guide.SetPosition(1, new Vector3(clampedX, _bottomY, 0f));
+            }
+        }
     }
 }
