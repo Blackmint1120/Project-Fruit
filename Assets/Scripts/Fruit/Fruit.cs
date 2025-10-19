@@ -13,7 +13,12 @@ public class Fruit : MonoBehaviour
     const float PopDuration = 0.08f;
     Vector3 baseScale;
 
-    void Awake() { baseScale = transform.localScale; }
+    void Awake()
+    {
+        baseScale = transform.localScale;
+        var rb = GetComponent<Rigidbody2D>();
+        rb.sleepMode = RigidbodySleepMode2D.NeverSleep;
+    }
 
     public void Init(FruitSet.Entry def) {
         level = def.level;
