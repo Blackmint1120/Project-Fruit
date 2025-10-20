@@ -8,19 +8,27 @@ public class ScoreManager : MonoBehaviour
     [SerializeField] private TMP_Text scoreText;
     private int score = 0;
 
+    private int bestScore;
+
     void Awake()
     {
         if (Instance == null) Instance = this;
         else Destroy(gameObject);
     }
 
-    void Start() => RefreshUI();
+    void Start()
+    {
+        bestScore = PlayerPrefs.GetInt("BestScore", 0);
+        RefreshUI();
+    }
 
     public void AddScore(int fruitLevel)
     {
-        // 간단히 레벨당 10점, 나중에 테이블화 가능
-        int gain = fruitLevel * 10;
-        score += gain;
+        score += fruitLevel * 10;
+        if (score > bestScore) {
+            bestScore = score;
+            PlayerPrefs.SetInt("BestScore", bestScore);
+        }
         RefreshUI();
     }
 
@@ -33,6 +41,6 @@ public class ScoreManager : MonoBehaviour
     void RefreshUI()
     {
         if (scoreText)
-            scoreText.text = $"SCORE: {score}";
+            scoreText.text = $"SCORE: {score}\nBEST: {bestScore}";
     }
 }
