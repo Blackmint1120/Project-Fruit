@@ -21,14 +21,20 @@ public class FruitSpawner : MonoBehaviour
     [SerializeField] private bool useGuideLine = true;
     [SerializeField] private float clampX = 5f; // 카메라 비율에 맞게 조정
     [SerializeField] private float spawnYOffset = 0.05f; // 라인보다 살짝 아래로
-
     public float dropLock = 1f;
+    
+    [Header("UI Preview")]
+    [SerializeField] private Image nextFruitImage;   // 🔹 다음 과일 표시용 UI
+    [SerializeField] private float nextFruitScale = 1.0f;
+    
     private bool isLocked = false;
 
-    readonly Queue<int> _queue = new();
+    private readonly Queue<int> _queue = new();
 
     float _currentRadius = 0.5f;    // 현재 드롭 예정 과일의 반지름
     float _bottomY;                 // 바닥선 y (Walls에 맞춰 세팅 권장)
+    
+    private Fruit currentFruit;
 
     void Start()
     {
@@ -45,27 +51,20 @@ public class FruitSpawner : MonoBehaviour
             guide.enabled = useGuideLine;
             if (useGuideLine) guide.positionCount = 2;
         }
+        
+        SpawnNextFruit();
     }
 
     void Update()
     {
-        Vector3 world = GetWorldPointerOnSpawnY();
-        world.x = Mathf.Clamp(world.x, -clampX + _currentRadius, clampX - _currentRadius);
-
-        // 가이드라인만 업데이트
+        if (currentFruit)
+            UpdateCurrentFruitPosition();
+        
         if (useGuideLine && guide)
-        {
-            guide.enabled = true;
-            guide.SetPosition(0, new Vector3(world.x, spawnY.position.y, 0f)); // 위
-            guide.SetPosition(1, new Vector3(world.x, _bottomY, 0f));          // 아래
-        }
+            UpdateGuideLine();
 
-        // 드롭 입력
-        if (Input.GetKeyDown(KeyCode.Space) && !isLocked)
-        {
-            Debug.Log("Space pressed, starting coroutine!");
-            StartCoroutine(LockDrop(world));
-        }
+        if (Input.GetKeyDown(KeyCode.Space) && !isLocked) 
+            StartCoroutine(LockDrop());
     }
 
     void SeedQueue()
@@ -107,6 +106,84 @@ public class FruitSpawner : MonoBehaviour
         // 큐가 바뀌었으니 현재 반지름 갱신
         UpdateCurrentRadius();
     }
+    
+    void SpawnNextFruit()
+    {
+        int lv = PeekCurrent();
+        float y = spawnY.position.y - (_currentRadius + spawnYOffset);
+        var f = factory.SpawnFruit(new Vector2(0, y), lv);
+        if (!f) return;
+
+        var rb = f.GetComponent<Rigidbody2D>();
+        var col = f.GetComponent<Collider2D>();
+        rb.gravityScale = 0f;
+        rb.linearVelocity = Vector2.zero;
+        rb.angularVelocity = 0f;
+        col.enabled = false;
+
+        currentFruit = f;
+        
+        UpdateNextFruitPreview();
+    }
+
+    void DropCurrentFruit()
+    {
+        if (!currentFruit) return;
+
+        var rb = currentFruit.GetComponent<Rigidbody2D>();
+        var col = currentFruit.GetComponent<Collider2D>();
+        rb.gravityScale = 1f;
+        col.enabled = true;
+
+        currentFruit.Pop();
+
+        currentFruit = null;
+
+        // 큐 갱신
+        NextAndRefill();
+        UpdateNextFruitPreview();
+        UpdateCurrentRadius();
+
+        // 다음 과일 준비
+        StartCoroutine(SpawnNextAfterDelay(0.3f));
+    }
+
+    IEnumerator SpawnNextAfterDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        SpawnNextFruit();
+    }
+
+    IEnumerator LockDrop()
+    {
+        isLocked = true;
+        DropCurrentFruit();
+        yield return new WaitForSeconds(dropLock);
+        isLocked = false;
+    }
+
+    void UpdateCurrentFruitPosition()
+    {
+        Vector3 world = GetWorldPointerOnSpawnY();
+        float clampedX = Mathf.Clamp(world.x, -clampX + _currentRadius, clampX - _currentRadius);
+
+        Vector3 pos = currentFruit.transform.position;
+        pos.x = clampedX;
+        currentFruit.transform.position = pos;
+    }
+
+    // -------------------------------
+    // Line & Helpers
+    // -------------------------------
+    void UpdateGuideLine()
+    {
+        Vector3 world = GetWorldPointerOnSpawnY();
+        float clampedX = Mathf.Clamp(world.x, -clampX + _currentRadius, clampX - _currentRadius);
+
+        guide.enabled = true;
+        guide.SetPosition(0, new Vector3(clampedX, spawnY.position.y, 0f));
+        guide.SetPosition(1, new Vector3(clampedX, _bottomY, 0f));
+    }
 
     Vector3 GetWorldPointerOnSpawnY()
     {
@@ -122,32 +199,47 @@ public class FruitSpawner : MonoBehaviour
     {
         Vector2 start = spawnY.position;
         RaycastHit2D hit = Physics2D.Raycast(start, Vector2.down);
-        return hit.point.y;
+        return hit ? hit.point.y : spawnY.position.y - 10f;
     }
 
-    IEnumerator LockDrop(Vector3 world)
-    {
-        isLocked = true;
-        DropAt(world.x);
-        yield return new WaitForSeconds(dropLock);
-        isLocked = false;
-    }
-    
+    // -------------------------------
+    // GuideLine Toggle
+    // -------------------------------
     public void OnToggleGuideLine(bool on)
     {
-        Debug.Log(on);
         useGuideLine = on;
         if (guide)
         {
             guide.enabled = on;
             if (on)
-            {
-                // 👉 켜질 때 바로 현재 마우스 위치 기준으로 한 번 그려준다
-                Vector3 world = GetWorldPointerOnSpawnY();
-                float clampedX = Mathf.Clamp(world.x, -clampX + _currentRadius, clampX - _currentRadius);
-                guide.SetPosition(0, new Vector3(clampedX, spawnY.position.y, 0f));
-                guide.SetPosition(1, new Vector3(clampedX, _bottomY, 0f));
-            }
+                UpdateGuideLine();
         }
+    }
+    
+    void UpdateNextFruitPreview()
+    {
+        if (!nextFruitImage) return;
+
+        int nextLevel = GetNextInQueue(1);
+        if (factory.FruitSet.TryGetByLevel(nextLevel, out var def))
+        {
+            // circleSprite 하나로 색상만 다르게 표시
+            nextFruitImage.sprite = factory.SharedCircleSprite;
+            nextFruitImage.color = def.color;
+        }
+    }
+    
+    int GetNextInQueue(int index)
+    {
+        if (_queue.Count == 0) return minLevel;
+        index = Mathf.Clamp(index, 0, _queue.Count - 1);
+
+        int i = 0;
+        foreach (var lv in _queue)
+        {
+            if (i == index) return lv;
+            i++;
+        }
+        return _queue.Peek();
     }
 }
