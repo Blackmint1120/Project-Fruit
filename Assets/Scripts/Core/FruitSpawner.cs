@@ -1,20 +1,22 @@
+using System;
 using System.Collections;
 using UnityEngine;
 using System.Collections.Generic;
 using UnityEngine.AI;
 using UnityEngine.UI;
+using Random = UnityEngine.Random;
 
 public class FruitSpawner : MonoBehaviour
 {
     [Header("Refs")]
     [SerializeField] private Camera mainCam;
     [SerializeField] private FruitFactory factory;
+    [SerializeField] private LevelManager levelManager;
     [SerializeField] private Transform spawnY;      // 상단 y 기준
     [SerializeField] private LineRenderer guide;    // 가이드라인 참조 (필수)
 
-    [Header("Level")]
-    [SerializeField] private int minLevel = 1;
-    [SerializeField] private int maxLevel = 6;
+    [Header("Level")] 
+    [SerializeField] private int fruitCounter = 0;
 
     [Header("Options")]
     [SerializeField] private bool useGuideLine = true;
@@ -37,7 +39,12 @@ public class FruitSpawner : MonoBehaviour
     void Start()
     {
         if (!mainCam) mainCam = Camera.main;
-        SeedQueue();
+
+        // 다음에 나올 Fruit 표시 위해 처음에는 2개 enqueue
+        for (int i = 0; i < 2; i++)
+        {
+            FruitEnqueue();
+        }
 
         // 맨 처음 반지름 캐시
         UpdateCurrentRadius();
@@ -65,23 +72,24 @@ public class FruitSpawner : MonoBehaviour
             StartCoroutine(LockDrop());
     }
 
-    void SeedQueue()
+    void FruitEnqueue()
     {
-        int min = factory.FruitSet.MinLevel;
-        int max = factory.FruitSet.MaxLevel;
-        if (minLevel < min) minLevel = min;
-        if (maxLevel > max) maxLevel = max;
-        
-        // 다음 fruit표시 위해 처음에 2개 enqueue
+        fruitCounter++;
+        (int minLevel, int maxLevel) = levelManager.GetLevelData(fruitCounter);
         _queue.Enqueue(Random.Range(minLevel, maxLevel + 1));
-        _queue.Enqueue(Random.Range(minLevel, maxLevel + 1));
+    }
+
+    int FruitDequeue()
+    {
+        int cur = _queue.Dequeue();
+        return cur;
     }
 
     int PeekCurrent() => _queue.Peek();
     int NextAndRefill()
     {
-        int cur = _queue.Dequeue();
-        _queue.Enqueue(Random.Range(minLevel, maxLevel + 1));
+        int cur = FruitDequeue();
+        FruitEnqueue();
         return cur;
     }
 
@@ -90,20 +98,6 @@ public class FruitSpawner : MonoBehaviour
         int lv = PeekCurrent();
         if (factory.FruitSet.TryGetByLevel(lv, out var def))
             _currentRadius = def.radius;
-    }
-
-    void DropAt(float x)
-    {
-        int lv = NextAndRefill();
-        // 갱신된 다음 과일 반지름을 미리 캐시
-        // (다음 프레임 클램프/라인에 반영되도록)
-        // 먼저 드롭용 위치 계산은 '직전 반지름'으로
-        float y = spawnY.position.y - (_currentRadius + spawnYOffset);
-        var fruit = factory.SpawnFruit(new Vector2(x, y), lv);
-        if (fruit) fruit.Pop();
-
-        // 큐가 바뀌었으니 현재 반지름 갱신
-        UpdateCurrentRadius();
     }
     
     void SpawnNextFruit()
@@ -230,7 +224,7 @@ public class FruitSpawner : MonoBehaviour
     
     int GetNextInQueue(int index)
     {
-        if (_queue.Count == 0) return minLevel;
+        if (_queue.Count == 0) throw new Exception("Queue is empty");
         index = Mathf.Clamp(index, 0, _queue.Count - 1);
 
         int i = 0;
