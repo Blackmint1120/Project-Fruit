@@ -12,8 +12,7 @@ public class FruitSpawner : MonoBehaviour
     [SerializeField] private Transform spawnY;      // 상단 y 기준
     [SerializeField] private LineRenderer guide;    // 가이드라인 참조 (필수)
 
-    [Header("Queue")]
-    [SerializeField] private int previewCount = 2;
+    [Header("Level")]
     [SerializeField] private int minLevel = 1;
     [SerializeField] private int maxLevel = 6;
 
@@ -25,7 +24,6 @@ public class FruitSpawner : MonoBehaviour
     
     [Header("UI Preview")]
     [SerializeField] private Image nextFruitImage;   // 🔹 다음 과일 표시용 UI
-    [SerializeField] private float nextFruitScale = 1.0f;
     
     private bool isLocked = false;
 
@@ -73,9 +71,10 @@ public class FruitSpawner : MonoBehaviour
         int max = factory.FruitSet.MaxLevel;
         if (minLevel < min) minLevel = min;
         if (maxLevel > max) maxLevel = max;
-
-        while (_queue.Count < previewCount + 1)
-            _queue.Enqueue(Random.Range(minLevel, maxLevel + 1));
+        
+        // 다음 fruit표시 위해 처음에 2개 enqueue
+        _queue.Enqueue(Random.Range(minLevel, maxLevel + 1));
+        _queue.Enqueue(Random.Range(minLevel, maxLevel + 1));
     }
 
     int PeekCurrent() => _queue.Peek();
