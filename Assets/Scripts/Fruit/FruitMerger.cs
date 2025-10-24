@@ -48,9 +48,11 @@ public class FruitMerger : MonoBehaviour
         // 다음 레벨
         int nextLevel = fruit.Level + 1;
 
-        // 팝 이펙트
-        GameManager.Instance.SpawnMergedFruit(nextLevel, mid);
-
+        if (nextLevel <= 10)
+        {
+            GameManager.Instance.SpawnMergedFruit(nextLevel, mid);
+        }
+        
         // 점수 추가
         ScoreManager.Instance.AddScore(fruit.Level);
 
