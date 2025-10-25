@@ -44,7 +44,6 @@ public class ResolutionManager : MonoBehaviour
     
     void ApplyDefaultResolution()
     {
-        // 처음 시작 시 창모드 1280x720
-        Screen.SetResolution(1280, 720, false);
+        Screen.SetResolution(Display.main.systemWidth, Display.main.systemHeight, true);
     }
 }
