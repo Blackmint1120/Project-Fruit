@@ -11,6 +11,7 @@ public class FruitSpawner : MonoBehaviour
     [Header("Refs")]
     [SerializeField] private Camera mainCam;
     [SerializeField] private FruitFactory factory;
+    [SerializeField] private GameManager gameManager;
     [SerializeField] private LevelManager levelManager;
     [SerializeField] private Transform spawnY;      // 상단 y 기준
     [SerializeField] private LineRenderer guide;    // 가이드라인 참조 (필수)
@@ -65,10 +66,10 @@ public class FruitSpawner : MonoBehaviour
         if (currentFruit)
             UpdateCurrentFruitPosition();
         
-        if (useGuideLine && guide)
+        if (useGuideLine && guide && gameManager.State == GameState.Playing)
             UpdateGuideLine();
 
-        if (Input.GetKeyDown(KeyCode.Space) && !isLocked) 
+        if (Input.GetKeyDown(KeyCode.Space) && !isLocked && gameManager.State == GameState.Playing) 
             StartCoroutine(LockDrop());
     }
 
