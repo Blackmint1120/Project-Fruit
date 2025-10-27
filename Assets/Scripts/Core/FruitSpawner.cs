@@ -122,8 +122,6 @@ public class FruitSpawner : MonoBehaviour
         rb.gravityScale = 1f;
         col.enabled = true;
 
-        currentFruit.Pop();
-
         currentFruit = null;
 
         // 큐 갱신
