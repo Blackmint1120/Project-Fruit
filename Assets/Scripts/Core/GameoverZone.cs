@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class GameOverZone : MonoBehaviour
 {
-    [SerializeField] private float triggerTime = 3f; // 일정 시간 유지 시 게임오버
+    [SerializeField] private float triggerTime; // 일정 시간 유지 시 게임오버
     private float timer = 0f;
 
     private int timerlog = 0;
@@ -11,9 +11,10 @@ public class GameOverZone : MonoBehaviour
     {
         if (!col.CompareTag("Fruit")) return;
         timer += Time.deltaTime;
-
+        
         if (timer >= timerlog + 1)
         {
+            timerlog++;
             Debug.Log($"{3 - timerlog}...");
         }
 

@@ -1137,7 +1137,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0393c2ecac46a474d913e2e4ee80d735, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::GameOverZone
-  triggerTime: 1.5
+  triggerTime: 3
 --- !u!1 &415492334
 GameObject:
   m_ObjectHideFlags: 0
@@ -3037,6 +3037,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::FruitSpawner
   mainCam: {fileID: 519420031}
   factory: {fileID: 979911461}
+  gameManager: {fileID: 865494859}
   levelManager: {fileID: 460067538}
   spawnY: {fileID: 1955930394}
   guide: {fileID: 784517360}
