@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 
 public class FruitFactory : MonoBehaviour
@@ -12,7 +13,7 @@ public class FruitFactory : MonoBehaviour
     public Fruit SpawnFruit(Vector2 pos, int level)
     {
         if (!fruitSet.TryGetByLevel(level, out var def)) {
-            Debug.LogError($"No fruit def for level {level}"); return null;
+            throw new Exception($"No fruit def for level {level}");
         }
         var go = Instantiate(fruitPrefab, pos, Quaternion.identity);
         var f = go.GetComponent<Fruit>();

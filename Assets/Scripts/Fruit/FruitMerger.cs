@@ -4,25 +4,23 @@ using UnityEngine;
 public class FruitMerger : MonoBehaviour
 {
     private Fruit fruit;
-    private Rigidbody2D rb;
     private bool merged = false;
 
     [SerializeField] private float mergeCooldown = 0.15f; // 두 번 중복 합침 방지
     private float disableTimer = 0f;
 
-    void Awake()
+    private void Awake()
     {
         fruit = GetComponent<Fruit>();
-        rb = GetComponent<Rigidbody2D>();
     }
 
-    void Update()
+    private void Update()
     {
         if (disableTimer > 0f)
             disableTimer -= Time.deltaTime;
     }
 
-    void OnCollisionEnter2D(Collision2D col)
+    private void OnCollisionEnter2D(Collision2D col)
     {
         if (disableTimer > 0f) return;
         if (!col.gameObject.CompareTag("Fruit")) return;
@@ -37,17 +35,18 @@ public class FruitMerger : MonoBehaviour
         }
     }
 
-    void MergeWith(Fruit other)
+    private void MergeWith(Fruit other)
     {
         merged = true;
         other.GetComponent<FruitMerger>().merged = true;
 
         // 중간점 계산
-        Vector3 mid = (transform.position + other.transform.position) / 2f;
+        var mid = (transform.position + other.transform.position) / 2f;
 
         // 다음 레벨
-        int nextLevel = fruit.Level + 1;
+        var nextLevel = fruit.Level + 1;
 
+        // 10레벨까지는 합치면 다음 단게, 10레벨 + 10레벨 => 둘 다 사라짐
         if (nextLevel <= 10)
         {
             GameManager.Instance.SpawnMergedFruit(nextLevel, mid);

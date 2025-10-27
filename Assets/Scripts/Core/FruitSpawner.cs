@@ -28,7 +28,7 @@ public class FruitSpawner : MonoBehaviour
     [Header("UI Preview")]
     [SerializeField] private Image nextFruitImage;
     
-    private bool isLocked = false;
+    private bool isLocked;
 
     private readonly Queue<int> _queue = new();
 
