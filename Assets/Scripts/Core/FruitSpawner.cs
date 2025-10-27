@@ -63,7 +63,7 @@ public class FruitSpawner : MonoBehaviour
 
     void Update()
     {
-        if (currentFruit)
+        if (currentFruit&& gameManager.State == GameState.Playing)
             UpdateCurrentFruitPosition();
         
         if (useGuideLine && guide && gameManager.State == GameState.Playing)
