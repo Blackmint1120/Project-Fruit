@@ -13,36 +13,36 @@ public class FruitSpawner : MonoBehaviour
     [SerializeField] private FruitFactory factory;
     [SerializeField] private GameManager gameManager;
     [SerializeField] private LevelManager levelManager;
-    [SerializeField] private Transform spawnY;      // 상단 y 기준
-    [SerializeField] private LineRenderer guide;    // 가이드라인 참조 (필수)
+    [SerializeField] private Transform spawnY;
+    [SerializeField] private LineRenderer guide;
 
     [Header("Level")] 
     [SerializeField] private int fruitCounter = 0;
 
     [Header("Options")]
     [SerializeField] private bool useGuideLine = true;
-    [SerializeField] private float clampX = 5f; // 카메라 비율에 맞게 조정
-    [SerializeField] private float spawnYOffset = 0.05f; // 라인보다 살짝 아래로
+    [SerializeField] private float clampX = 5f;
+    [SerializeField] private float spawnYOffset = 0.05f;
     public float dropLock = 1f;
     
     [Header("UI Preview")]
-    [SerializeField] private Image nextFruitImage;   // 🔹 다음 과일 표시용 UI
+    [SerializeField] private Image nextFruitImage;
     
     private bool isLocked = false;
 
     private readonly Queue<int> _queue = new();
 
-    float _currentRadius = 0.5f;    // 현재 드롭 예정 과일의 반지름
-    float _bottomY;                 // 바닥선 y (Walls에 맞춰 세팅 권장)
+    private float _currentRadius = 0.5f;
+    private float _bottomY;
     
     private Fruit currentFruit;
 
-    void Start()
+    private void Start()
     {
         if (!mainCam) mainCam = Camera.main;
 
         // 다음에 나올 Fruit 표시 위해 처음에는 2개 enqueue
-        for (int i = 0; i < 2; i++)
+        for (var i = 0; i < 2; i++)
         {
             FruitEnqueue();
         }
@@ -50,18 +50,17 @@ public class FruitSpawner : MonoBehaviour
         // 맨 처음 반지름 캐시
         UpdateCurrentRadius();
 
-        // 바닥선 찾기(없으면 임시로 화면 하단)
+        // 바닥선 찾기
         _bottomY = FindFloorY();
         if (guide)
         {
             guide.enabled = useGuideLine;
-            if (useGuideLine) guide.positionCount = 2;
         }
         
         SpawnNextFruit();
     }
 
-    void Update()
+    private void Update()
     {
         if (currentFruit&& gameManager.State == GameState.Playing)
             UpdateCurrentFruitPosition();
@@ -73,40 +72,34 @@ public class FruitSpawner : MonoBehaviour
             StartCoroutine(LockDrop());
     }
 
-    void FruitEnqueue()
+    private void FruitEnqueue()
     {
         fruitCounter++;
-        (int minLevel, int maxLevel) = levelManager.GetLevelData(fruitCounter);
+        (var minLevel, var maxLevel) = levelManager.GetLevelData(fruitCounter);
         _queue.Enqueue(Random.Range(minLevel, maxLevel + 1));
     }
 
-    int FruitDequeue()
+    private int PeekCurrent() => _queue.Peek();
+    private void NextAndRefill()
     {
-        int cur = _queue.Dequeue();
-        return cur;
-    }
-
-    int PeekCurrent() => _queue.Peek();
-    int NextAndRefill()
-    {
-        int cur = FruitDequeue();
+        _ = _queue.Dequeue();
         FruitEnqueue();
-        return cur;
     }
 
-    void UpdateCurrentRadius()
+    private void UpdateCurrentRadius()
     {
-        int lv = PeekCurrent();
+        var lv = PeekCurrent();
         if (factory.FruitSet.TryGetByLevel(lv, out var def))
             _currentRadius = def.radius;
     }
     
-    void SpawnNextFruit()
+    private void SpawnNextFruit()
     {
-        int lv = PeekCurrent();
-        float y = spawnY.position.y - (_currentRadius + spawnYOffset);
+        var lv = PeekCurrent();
+        var y = spawnY.position.y - (_currentRadius + spawnYOffset);
         var f = factory.SpawnFruit(new Vector2(0, y), lv);
-        if (!f) return;
+        
+        if (!f) throw new Exception("SpawnNextFruit : fruit spawn failed");
 
         var rb = f.GetComponent<Rigidbody2D>();
         var col = f.GetComponent<Collider2D>();
@@ -120,9 +113,9 @@ public class FruitSpawner : MonoBehaviour
         UpdateNextFruitPreview();
     }
 
-    void DropCurrentFruit()
+    private void DropCurrentFruit()
     {
-        if (!currentFruit) return;
+        if (!currentFruit) throw new Exception("DropCurrentFruit : current fruit is null");
 
         var rb = currentFruit.GetComponent<Rigidbody2D>();
         var col = currentFruit.GetComponent<Collider2D>();
@@ -142,13 +135,13 @@ public class FruitSpawner : MonoBehaviour
         StartCoroutine(SpawnNextAfterDelay(0.3f));
     }
 
-    IEnumerator SpawnNextAfterDelay(float delay)
+    private IEnumerator SpawnNextAfterDelay(float delay)
     {
         yield return new WaitForSeconds(delay);
         SpawnNextFruit();
     }
 
-    IEnumerator LockDrop()
+    private IEnumerator LockDrop()
     {
         isLocked = true;
         DropCurrentFruit();
@@ -156,44 +149,45 @@ public class FruitSpawner : MonoBehaviour
         isLocked = false;
     }
 
-    void UpdateCurrentFruitPosition()
+    private void UpdateCurrentFruitPosition()
     {
-        Vector3 world = GetWorldPointerOnSpawnY();
-        float clampedX = Mathf.Clamp(world.x, -clampX + _currentRadius, clampX - _currentRadius);
+        var world = GetWorldPointerOnSpawnY();
+        var clampedX = Mathf.Clamp(world.x, -clampX + _currentRadius, clampX - _currentRadius);
 
-        Vector3 pos = currentFruit.transform.position;
+        var pos = currentFruit.transform.position;
         pos.x = clampedX;
         currentFruit.transform.position = pos;
     }
 
     // -------------------------------
-    // Line & Helpers
+    // GuideLine
     // -------------------------------
-    void UpdateGuideLine()
+    private void UpdateGuideLine()
     {
-        Vector3 world = GetWorldPointerOnSpawnY();
-        float clampedX = Mathf.Clamp(world.x, -clampX + _currentRadius, clampX - _currentRadius);
+        var world = GetWorldPointerOnSpawnY();
+        var clampedX = Mathf.Clamp(world.x, -clampX + _currentRadius, clampX - _currentRadius);
 
         guide.enabled = true;
         guide.SetPosition(0, new Vector3(clampedX, spawnY.position.y, 0f));
         guide.SetPosition(1, new Vector3(clampedX, _bottomY, 0f));
     }
 
-    Vector3 GetWorldPointerOnSpawnY()
+    private Vector3 GetWorldPointerOnSpawnY()
     {
-        Vector3 mouse = Input.mousePosition;
+        var mouse = Input.mousePosition;
         mouse.z = Mathf.Abs(mainCam.transform.position.z);
-        Vector3 world = mainCam.ScreenToWorldPoint(mouse);
+        var world = mainCam.ScreenToWorldPoint(mouse);
         world.y = spawnY.position.y;
         world.z = 0;
         return world;
     }
 
-    float FindFloorY()
+    private float FindFloorY()
     {
         Vector2 start = spawnY.position;
-        RaycastHit2D hit = Physics2D.Raycast(start, Vector2.down);
-        return hit ? hit.point.y : spawnY.position.y - 10f;
+        var hit = Physics2D.Raycast(start, Vector2.down);
+        if (!hit) throw new Exception("Cannot find floor");
+        return hit.point.y;
     }
 
     // -------------------------------
@@ -202,19 +196,18 @@ public class FruitSpawner : MonoBehaviour
     public void OnToggleGuideLine(bool on)
     {
         useGuideLine = on;
-        if (guide)
-        {
-            guide.enabled = on;
-            if (on)
-                UpdateGuideLine();
-        }
+        if (!guide) return;
+        
+        guide.enabled = on;
+        if (on)
+            UpdateGuideLine();
     }
     
-    void UpdateNextFruitPreview()
+    private void UpdateNextFruitPreview()
     {
-        if (!nextFruitImage) return;
+        if (!nextFruitImage) throw new Exception("UpdateNextFruitPreview: next fruit image is null");
 
-        int nextLevel = GetNextInQueue(1);
+        var nextLevel = GetNextInQueue(1);
         if (factory.FruitSet.TryGetByLevel(nextLevel, out var def))
         {
             // circleSprite 하나로 색상만 다르게 표시
@@ -223,12 +216,12 @@ public class FruitSpawner : MonoBehaviour
         }
     }
     
-    int GetNextInQueue(int index)
+    private int GetNextInQueue(int index)
     {
         if (_queue.Count == 0) throw new Exception("Queue is empty");
         index = Mathf.Clamp(index, 0, _queue.Count - 1);
 
-        int i = 0;
+        var i = 0;
         foreach (var lv in _queue)
         {
             if (i == index) return lv;
