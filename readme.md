@@ -9,3 +9,7 @@ Project-Fruit
 
 Personal game project inspired by the minigame [BFG Clean Up!] from [GODDESS OF VICTORY: NIKKE].
 This repository contains a Unity 2D implementation created for learning and practice purposes.
+
+---
+
+[게임 플레이 (Github Pages)] (https://blackmint1120.github.io/Project-Fruit/)
