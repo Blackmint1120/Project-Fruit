@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class PauseInput : MonoBehaviour
 {
-    void Update()
+    private void Update()
     {
         if (Input.GetKeyDown(KeyCode.Escape))
         {

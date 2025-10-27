@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -14,13 +15,13 @@ public class GameManager : MonoBehaviour
     
     public GameState State { get; private set; } = GameState.Playing;
 
-    void Awake()
+    private void Awake()
     {
         if (Instance == null) Instance = this;
         else Destroy(gameObject);
     }
     
-    void Start()
+    private void Start()
     {
         State = GameState.Playing;
         Time.timeScale = 1f;
@@ -38,22 +39,27 @@ public class GameManager : MonoBehaviour
     
     public void TogglePause()
     {
-        if (State == GameState.GameOver) return;
-
-        if (State == GameState.Playing)
+        switch (State)
         {
-            State = GameState.Paused;
-            Time.timeScale = 0f;
-            if (pausePanel) pausePanel.SetActive(true);
-        }
-        else
-        {
-            Resume();
+            case GameState.Playing:
+                State = GameState.Paused;
+                Time.timeScale = 0f;
+                if (pausePanel) pausePanel.SetActive(true);
+                break;
+            case GameState.GameOver:
+                break;
+            case GameState.Paused:
+                Resume();
+                break;
+            default:
+                throw new ArgumentOutOfRangeException();
         }
     }
     
     public void Resume()
     {
+        if (State != GameState.Paused) throw new Exception($"Resume in Invalid state : {State}");
+        
         State = GameState.Playing;
         Time.timeScale = 1f;
         if (pausePanel) pausePanel.SetActive(false);
@@ -61,12 +67,16 @@ public class GameManager : MonoBehaviour
     
     public void RestartGame()
     {
+        if (State != GameState.Paused && State != GameState.GameOver) throw new Exception($"Restart in Invalid state : {State}");
+        
         Time.timeScale = 1f;
         SceneManager.LoadScene("GameScene");
     }
     
     public void GoToTitle()
     {
+        if (State != GameState.Paused && State != GameState.GameOver) throw new Exception($"GoToTitle in Invalid state : {State}");
+        
         Time.timeScale = 1f;
         SceneManager.LoadScene("TitleScene");
     }
@@ -75,10 +85,6 @@ public class GameManager : MonoBehaviour
     {
         if (factory == null) return;
 
-        var fruit = factory.SpawnFruit(pos, level);
-        if (fruit != null)
-        {
-            fruit.Pop();
-        }
+        factory.SpawnFruit(pos, level);
     }
 }
